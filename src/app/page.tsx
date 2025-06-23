@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {CiCoffeeCup} from 'react-icons/ci';
 import {FaDiscord, FaPlus} from 'react-icons/fa';
 import {GoCircle} from 'react-icons/go';
@@ -8,10 +8,28 @@ import {GrLanguage} from 'react-icons/gr';
 import {IoLogoFacebook} from 'react-icons/io';
 import {IoMdArrowDropdown} from 'react-icons/io';
 import {MdVerifiedUser} from 'react-icons/md';
+import CallGroupPreview from '@components/CallGroupPreview';
 import packageJson from '../../package.json';
+type CallGroupPreviewType = {
+    language: string;
+    level: string;
+    subtitle: string;
+    isMicrophoneDisabled: boolean;
+    numberOfParticipants: number;
+};
 
 function HomePage() {
     const [showModal, setShowModal] = useState(false);
+    const [callGroups, setCallGroups] = useState<CallGroupPreviewType[]>([]);
+    const numberOfGroups = 10;
+    useEffect(() => {
+        // Fetch from Express API
+        fetch("http://192.168.253.221:3000/call-group-preview")
+        .then((response) => response.json())
+            .then((data) => setCallGroups(data))
+            .catch((error) => console.error('Error fetching call groups:', error));
+    }, []);
+    console.log("callGroups",callGroups)
 
     return (
         <>
@@ -41,31 +59,35 @@ function HomePage() {
                         <FaPlus /> Create a new group
                     </button>
 
-                    <button
-                        className="bg-yellow-600 text-white px-4 py-2 rounded flex items-center gap-2 border border-transparent hover:border-blue-700 cursor-pointer"
-                    >
-                        <CiCoffeeCup /> Buy me a coffee
+                    <button className="bg-yellow-600 text-white px-4 py-2 rounded flex items-center gap-2 border border-transparent hover:border-blue-700 cursor-pointer font-[cursive]">
+                        <CiCoffeeCup className="text-2xl"/> Buy me a coffee
                     </button>
 
-                    <button
-                        className="bg-gray-800 text-white px-4 py-2 rounded flex items-center gap-2 border border-transparent hover:border-blue-700 cursor-pointer"
-                    >
+                    <button className="bg-gray-800 text-white px-4 py-2 rounded flex items-center gap-2 border border-transparent hover:border-blue-700 cursor-pointer">
                         <MdVerifiedUser /> Privacy policy
                     </button>
 
-                    <button
-                        className="bg-gray-800 text-white px-4 py-2 rounded flex items-center gap-2 border border-transparent hover:border-blue-700 cursor-pointer"
-                    >
+                    <button className="bg-gray-800 text-white px-4 py-2 rounded flex items-center gap-2 border border-transparent hover:border-blue-700 cursor-pointer">
                         <FaDiscord style={{color: '#5865F2'}} />
                         Free4Talk Discord
                     </button>
 
-                    <button
-                        className="bg-gray-800 text-white px-4 py-2 rounded flex items-center gap-2 border border-transparent hover:border-blue-700 cursor-pointer"
-                    >
+                    <button className="bg-gray-800 text-white px-4 py-2 rounded flex items-center gap-2 border border-transparent hover:border-blue-700 cursor-pointer">
                         <IoLogoFacebook />
                         Facebook group
                     </button>
+                </div>
+                <div className="grid grid-cols-3 gap-4 px-25 pt-10 justify-center">
+                {callGroups.map((group, index) => (
+                       <CallGroupPreview
+                       key={index}
+                       language={group.language}
+                       level={group.level}
+                       subtitle={group.subtitle}
+                       isMicrophoneDisabled={group.isMicrophoneDisabled}
+                       numberOfParticipants={group.numberOfParticipants}
+                   />
+                    ))}
                 </div>
 
                 {showModal && (
